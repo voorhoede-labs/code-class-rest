@@ -4,7 +4,7 @@ const MovieSchema = new mongoose.Schema({
     title: String,
     director: String,
     summary: String,
-    votes: number
+    votes: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('Movie', MovieSchema);
