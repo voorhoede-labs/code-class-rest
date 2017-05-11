@@ -7,6 +7,9 @@ const Promise = require('bluebird');
 const app = express();
 const port = process.env.PORT || 1338;
 
+// Instantiate Movie model
+const Movie = require('./models/movie');
+
 // Get environment variables from .env file
 require('dotenv').config();
 
