@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
 
 const MovieSchema = new mongoose.Schema({
-    title: String,
-    director: String,
-    summary: String,
+    title: { type: String, required: true },
+    director: { type: String, default: '' },
+    summary: { type: String, default: '' },
     votes: { type: Number, default: 0 }
 });
 
