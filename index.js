@@ -18,7 +18,7 @@ mongoose.Promise = Promise;
 mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
 
 // Express plugin to parse JSON request body
-app.use(bodyParser.json({ extended: true }));
+app.use(bodyParser.json());
 
 // Sanitize strings to prevent MongoDB Operator Injection
 // http://blog.websecurify.com/2014/08/hacking-nodejs-and-mongodb.html
