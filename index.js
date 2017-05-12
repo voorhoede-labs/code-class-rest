@@ -52,7 +52,7 @@ app.route('/movies/:id')
     .get(actions.show)
     .put(actions.update)
     .delete(actions.remove)
-    .all(sendAllowed('GET, PUT'));
+    .all(sendAllowed('GET, PUT, DELETE'));
 
 // Action
 app.route('/movies/:id/vote')
