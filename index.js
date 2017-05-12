@@ -42,15 +42,16 @@ function sendAllowed(methods) {
 
 // Collection
 app.route('/movies')
-    .get(actions.list)
-    .post(actions.make)
-    .delete(actions.empty)
+    .get(actions.all)
+    .post(actions.create)
+    .delete(actions.reset)
     .all(sendAllowed('GET, POST, DELETE'));
 
 // Item
 app.route('/movies/:id')
-    .get(actions.one)
+    .get(actions.show)
     .put(actions.update)
+    .delete(actions.remove)
     .all(sendAllowed('GET, PUT'));
 
 // Action

@@ -6,14 +6,14 @@ function sendMovie(res, movie) {
     res.json(movie);
 }
 
-function list(req, res, next) {
+function all(req, res, next) {
     Movie.find().exec()
         .then(movies => {
             res.json({movies});
         });
 }
 
-function make(req, res, next) {
+function create(req, res, next) {
     new Movie({
         title: req.body.title,
         director: req.body.director,
@@ -24,14 +24,13 @@ function make(req, res, next) {
         .catch(err => next(err));
 }
 
-function empty(req, res, next) {
+function reset(req, res, next) {
     Movie.remove().exec()
-        .then(() => {
-            res.status(204).end();
-        }).catch(err => next(err));
+        .then(() => res.status(204).end())
+        .catch(err => next(err));
 }
 
-function one(req, res, next) {
+function show(req, res, next) {
     Movie.findById(req.params.id).exec()
         .then(movie => sendMovie(res, movie))
         .catch(err => next(err))
@@ -50,6 +49,12 @@ function update(req, res, next) {
         .catch(err => next(err));
 }
 
+function remove(req, res, next) {
+    Movie.findOneAndRemove(req.params.id).exec()
+        .then(() => res.status(204).end())
+        .catch(err => next(err));
+}
+
 function vote(req, res, next) {
     Movie.findById(req.params.id).exec()
         .then(movie => {
@@ -59,4 +64,4 @@ function vote(req, res, next) {
         .catch(err => next(err));
 }
 
-module.exports = { list, make, empty, one, update, vote };
+module.exports = { all, create, reset, show, update, remove, vote };
