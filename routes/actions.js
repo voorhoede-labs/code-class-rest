@@ -32,23 +32,20 @@ function show(req, res, next) {
 }
 
 function update(req, res, next) {
-    Movie.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true }).exec()
+    Movie.findByIdAndUpdate(req.params.id, req.body, { new: true }).exec()
         .then(movie => (movie) ? sendMovie(res, movie) : next())
         .catch(err => next(err));
 }
 
 function remove(req, res, next) {
-    Movie.findOneAndRemove({ _id: req.params.id }).exec()
+    Movie.findByIdAndRemove(req.params.id).exec()
         .then(movie => (movie) ? res.status(204).end() : next()) // Should send a status 410 Gone if id existed once
         .catch(err => next(err));
 }
 
 function vote(req, res, next) {
-    Movie.findById(req.params.id).exec()
-        .then(movie => {
-            movie.votes += 1;
-            return movie.save();
-        }).then(movie => sendMovie(res, movie))
+    Movie.findByIdAndUpdate(req.params.id, { $inc: { votes: 1 }}, { new: true }).exec()
+        .then(movie => (movie) ? sendMovie(res, movie) : next())
         .catch(err => next(err));
 }
 
