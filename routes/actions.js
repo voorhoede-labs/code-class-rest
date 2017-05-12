@@ -14,12 +14,7 @@ function all(req, res, next) {
 }
 
 function create(req, res, next) {
-    new Movie({
-        title: req.body.title,
-        director: req.body.director,
-        summary: req.body.summary,
-        votes: req.body.votes
-    }).save()
+    new Movie(req.body).save()
         .then(movie => sendMovie(res, movie))
         .catch(err => next(err));
 }
@@ -37,20 +32,13 @@ function show(req, res, next) {
 }
 
 function update(req, res, next) {
-    Movie.findById(req.params.id).exec()
-        .then(movie => {
-            movie.title = req.body.title || movie.title;
-            movie.director = req.body.director || movie.director;
-            movie.summary = req.body.summary || movie.summary;
-            movie.votes = req.body.votes || movie.votes;
-            return movie.save();
-        })
-        .then(movie => sendMovie(res, movie))
+    Movie.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true }).exec()
+        .then(movie => (movie) ? sendMovie(res, movie) : next())
         .catch(err => next(err));
 }
 
 function remove(req, res, next) {
-    Movie.findOneAndRemove(req.params.id).exec()
+    Movie.findOneAndRemove({ _id: req.params.id }).exec()
         .then(movie => (movie) ? res.status(204).end() : next()) // Should send a status 410 Gone if id existed once
         .catch(err => next(err));
 }
