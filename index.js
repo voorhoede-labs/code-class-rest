@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const mongoSanitize = require('express-mongo-sanitize');
 const Promise = require('bluebird');
+const actions = require('./routes/actions');
 
 // Get environment variables from .env file
 require('dotenv').config();
@@ -30,88 +31,32 @@ app.use(bodyParser.json());
 // http://blog.websecurify.com/2014/08/hacking-nodejs-and-mongodb.html
 app.use(mongoSanitize());
 
-// Helper to set content location & return movie object as response body
-function sendMovie(res, movie) {
-    res.setHeader('Content-Location', `/movies/${movie._id}`);
-    res.json(movie);
+// Helper to send a Method Not Allowed header along with an Allow header
+// designating which methods consumer should use
+function sendAllowed(methods) {
+    return (req, res, next) => {
+        res.setHeader('Allow', methods);
+        res.sendStatus(405);
+    }
 }
 
 // Collection
 app.route('/movies')
-    // Get list of movies
-    .get((req, res, next) => {
-        Movie.find().exec()
-            .then(movies => {
-                res.json({movies});
-            });
-    })
-    // Create movie
-    .post((req, res, next) => {
-        const movie = new Movie({
-            title: req.body.title,
-            director: req.body.director,
-            summary: req.body.summary,
-            votes: req.body.votes
-        }).save()
-            .then(movie => sendMovie(res, movie))
-            .catch(err => next(err));
-    })
-    // Delete all movies
-    .delete((req, res, next) => {
-        Movie.remove().exec()
-            .then(() => {
-                res.status(204).end();
-            }).catch(err => next(err));
-    })
-    // Send proper 405 Method Not Allowed
-    .all((req, res, next) => {
-        res.setHeader('Allow', 'GET, POST, DELETE');
-        res.sendStatus(405);
-    });
+    .get(actions.list)
+    .post(actions.make)
+    .delete(actions.empty)
+    .all(sendAllowed('GET, POST, DELETE'));
 
 // Item
 app.route('/movies/:id')
-    // Get movie
-    .get((req, res, next) => {
-        Movie.findById(req.params.id).exec()
-            .then(movie => sendMovie(res, movie))
-            .catch(err => next(err))
-    })
-    // Update movie
-    .put((req, res, next) => {
-        Movie.findById(req.params.id).exec()
-            .then(movie => {
-                movie.title = req.body.title || movie.title;
-                movie.director = req.body.director || movie.director;
-                movie.summary = req.body.summary || movie.summary;
-                movie.votes = req.body.votes || movie.votes;
-                return movie.save();
-            })
-            .then(movie => sendMovie(res, movie))
-            .catch(err => next(err));
-    })
-    // Send proper 405 Method Not Allowed
-    .all((req, res, next) => {
-        res.setHeader('Allow', 'GET, PUT');
-        res.sendStatus(405);
-});
+    .get(actions.one)
+    .put(actions.update)
+    .all(sendAllowed('GET, PUT'));
 
 // Action
 app.route('/movies/:id/vote')
-    // Vote for a movie
-    .patch((req, res, next) => {
-        Movie.findById(req.params.id).exec()
-            .then(movie => {
-                movie.votes += 1;
-                return movie.save();
-            }).then(movie => sendMovie(res, movie))
-            .catch(err => next(err));
-    })
-    // Send proper 405 Method Not Allowed
-    .all((req, res, next) => {
-        res.setHeader('Allow', 'PATCH');
-        res.sendStatus(405);
-});
+    .patch(actions.vote)
+    .all(sendAllowed('PATCH'));
 
 // Error handling
 app.use((err, req, res, next) => {
