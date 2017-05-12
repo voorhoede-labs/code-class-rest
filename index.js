@@ -33,10 +33,16 @@ app.use(mongoSanitize());
 
 // Helper to send a Method Not Allowed header along with an Allow header
 // designating which methods consumer should use
+//
+// @param methods String uppercase, comma + space separa
 function sendAllowed(methods) {
     return (req, res, next) => {
-        res.setHeader('Allow', methods);
-        res.sendStatus(405);
+        if (methods.includes(req.method.toLowerCase())) {
+            next();
+        } else {
+            res.setHeader('Allow', methods.join(', ').toUpperCase());
+            res.sendStatus(405);
+        }
     }
 }
 
@@ -45,19 +51,19 @@ app.route('/movies')
     .get(actions.all)
     .post(actions.create)
     .delete(actions.reset)
-    .all(sendAllowed('GET, POST, DELETE'));
+    .all(sendAllowed(['get','post','delete']));
 
 // Item
 app.route('/movies/:id')
     .get(actions.show)
     .put(actions.update)
     .delete(actions.remove)
-    .all(sendAllowed('GET, PUT, DELETE'));
+    .all(sendAllowed(['get', 'put', 'delete']));
 
 // Action
 app.route('/movies/:id/vote')
     .patch(actions.vote)
-    .all(sendAllowed('PATCH'));
+    .all(sendAllowed(['patch']));
 
 // Error handling
 app.use((err, req, res, next) => {

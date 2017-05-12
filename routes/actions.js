@@ -32,8 +32,8 @@ function reset(req, res, next) {
 
 function show(req, res, next) {
     Movie.findById(req.params.id).exec()
-        .then(movie => sendMovie(res, movie))
-        .catch(err => next(err))
+        .then(movie => (movie) ? sendMovie(res, movie) : next())
+        .catch(err => next(err));
 }
 
 function update(req, res, next) {
@@ -51,7 +51,7 @@ function update(req, res, next) {
 
 function remove(req, res, next) {
     Movie.findOneAndRemove(req.params.id).exec()
-        .then(() => res.status(204).end())
+        .then(movie => (movie) ? res.status(204).end() : next()) // Should send a status 410 Gone if id existed once
         .catch(err => next(err));
 }
 
