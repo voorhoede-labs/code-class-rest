@@ -8,14 +8,16 @@ function sendMovie(res, movie) {
 
 function all(req, res, next) {
     Movie.find().exec()
-        .then(movies => {
-            res.json({movies});
-        });
+        .then(movies => res.json({movies}))
+        .catch(err => next(err));
 }
 
 function create(req, res, next) {
     new Movie(req.body).save()
-        .then(movie => sendMovie(res, movie))
+        .then(movie => {
+            res.status(201);
+            return sendMovie(res, movie);
+        })
         .catch(err => next(err));
 }
 
