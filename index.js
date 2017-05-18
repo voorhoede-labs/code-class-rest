@@ -3,7 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const mongoSanitize = require('express-mongo-sanitize');
 const Promise = require('bluebird');
-const actions = require('./routes/actions');
+const movies = require('./routes/movies');
+const actors = require('./routes/actors');
 
 // Get environment variables from .env file
 require('dotenv').config();
@@ -15,8 +16,9 @@ mongoose.Promise = Promise;
 // Connect to the database
 mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
 
-// Instantiate Movie model
+// Instantiate models
 const Movie = require('./models/movie');
+const Actor = require('./models/actor');
 
 // Set up Express app
 const app = express();
@@ -46,24 +48,45 @@ function sendAllowed(methods) {
     }
 }
 
+// Movies
 // Collection
 app.route('/movies')
-    .get(actions.all)
-    .post(actions.create)
-    .delete(actions.reset)
+    .get(movies.all)
+    .post(movies.create)
+    .delete(movies.reset)
     .all(sendAllowed(['get','post','delete']));
 
 // Item
 app.route('/movies/:id')
-    .get(actions.show)
-    .put(actions.update)
-    .delete(actions.remove)
+    .get(movies.show)
+    .put(movies.update)
+    .delete(movies.remove)
     .all(sendAllowed(['get', 'put', 'delete']));
 
 // Action
 app.route('/movies/:id/vote')
-    .patch(actions.vote)
+    .patch(movies.vote)
     .all(sendAllowed(['patch']));
+
+// Actors
+// Collection
+app.route('/actors')
+    .get(actors.all)
+    .post(actors.create)
+    .delete(actors.reset)
+    .all(sendAllowed(['get','post','delete']));
+
+// Item
+app.route('/actors/:id')
+    .get(actors.show)
+    .put(actors.update)
+    .delete(actors.remove)
+    .all(sendAllowed(['get', 'put', 'delete']));
+
+// Actor for Movie
+app.route('/movies/:id/actors')
+    .get(movies.cast)
+    .post(movies.add_actor);
 
 // Error handling
 app.use((err, req, res, next) => {

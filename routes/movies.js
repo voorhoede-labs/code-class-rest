@@ -1,4 +1,5 @@
 const Movie = require('../models/movie');
+const Actor = require('../models/actor');
 
 // Helper to set content location & return movie object as response body
 function sendMovie(res, movie) {
@@ -7,7 +8,7 @@ function sendMovie(res, movie) {
 }
 
 function all(req, res, next) {
-    Movie.find().exec()
+    Movie.find().populate('actors').exec()
         .then(movies => {
             res.json({movies});
         });
@@ -26,7 +27,7 @@ function reset(req, res, next) {
 }
 
 function show(req, res, next) {
-    Movie.findById(req.params.id).exec()
+    Movie.findById(req.params.id).populate('actors').exec()
         .then(movie => (movie) ? sendMovie(res, movie) : next())
         .catch(err => next(err));
 }
@@ -49,4 +50,26 @@ function vote(req, res, next) {
         .catch(err => next(err));
 }
 
-module.exports = { all, create, reset, show, update, remove, vote };
+function cast(req, res, next) {
+    Movie.findById(req.params.id).populate('actors').exec()
+        .then(movie => {
+            res.json(movie.actors);
+        }).catch(err => next(err));
+}
+
+function add_actor(req, res, next) {
+    Movie.findById(req.params.id).exec()
+        .then(movie => {
+            req.body.forEach(actor => {
+                new Actor(actor).save().then(actor => {
+                    movie.actors.push(actor._id);
+                    movie.save();
+                }).catch(err => next(err));
+            });
+            return movie;
+        })
+        .then(movie => (movie) ? sendMovie(res, movie) : next())
+        .catch(err => next(err));
+}
+
+module.exports = { all, create, reset, show, update, remove, vote, cast, add_actor };
