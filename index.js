@@ -41,44 +41,44 @@ function sendAllowed(methods) {
             next();
         } else {
             res.setHeader('Allow', methods.join(', ').toUpperCase());
-            res.sendStatus(405);
+            res.sendStatus(/* STATUSCODE */);
         }
     }
 }
 
-// Collection
-app.route('/movies')
-    .get(actions.all)
-    .post(actions.create)
-    .delete(actions.reset)
-    .all(sendAllowed(['get','post','delete']));
+/**
 
-// Item
-app.route('/movies/:id')
-    .get(actions.show)
-    .put(actions.update)
-    .delete(actions.remove)
-    .all(sendAllowed(['get', 'put', 'delete']));
+- Create routes for "all, create, reset, show, update, remove & vote" endpoints (see /routes/actions.js)
+- Use the right HTTP verbs
+- Send an Allow header for the verbs that are supported (see 'sendAllowed' function above)
+- Find all STATUSCODE bits and put the right status codes in there (https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+- Use '.all' on a route as the last handler to catch all other methods that aren't impelemented
 
-// Action
-app.route('/movies/:id/vote')
-    .patch(actions.vote)
-    .all(sendAllowed(['patch']));
+Code template:
+
+app.route('/some-route-goes-here')
+    .someVerbGoesHere(actions.someFunction)
+    .propablyAnotherVerbGoesHere(actions.someOtherFunction)
+    .et
+    .cetera
+    .all(sendAllowed(someArrayOfHTTPVerbs));
+
+*/
 
 // Error handling
 app.use((err, req, res, next) => {
     console.error(err);
     switch(err.name) {
         case "ValidationError":
-            res.status('400').json({ statusCode: 400, message: err.errors.title.message });
+            res.status(/* STATUSCODE */).json({ statusCode: /* STATUSCODE */, message: err.errors.title.message });
             break;
         default:
-            res.status('500').json({ statusCode: 500, message: 'Unknown error', error: err });
+            res.status(/* STATUSCODE */).json({ statusCode: /* STATUSCODE */, message: 'Unknown error', error: err });
     }
 });
 
 // Not found
-app.use((req, res, next) => res.sendStatus(404));
+app.use((req, res, next) => res.sendStatus(/* STATUSCODE */));
 
 // Run server
 const port = process.env.PORT || 1338;

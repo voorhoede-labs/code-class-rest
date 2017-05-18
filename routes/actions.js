@@ -15,7 +15,7 @@ function all(req, res, next) {
 function create(req, res, next) {
     new Movie(req.body).save()
         .then(movie => {
-            res.status(201);
+            res.status(/* STATUSCODE */);
             return sendMovie(res, movie);
         })
         .catch(err => next(err));
@@ -23,7 +23,7 @@ function create(req, res, next) {
 
 function reset(req, res, next) {
     Movie.remove().exec()
-        .then(() => res.status(204).end())
+        .then(() => res.status(/* STATUSCODE */).end())
         .catch(err => next(err));
 }
 
@@ -41,7 +41,7 @@ function update(req, res, next) {
 
 function remove(req, res, next) {
     Movie.findByIdAndRemove(req.params.id).exec()
-        .then(movie => (movie) ? res.status(204).end() : next()) // Should send a status 410 Gone if id existed once
+        .then(movie => (movie) ? res.status(/* STATUSCODE */).end() : next())
         .catch(err => next(err));
 }
 
